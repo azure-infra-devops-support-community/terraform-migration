@@ -18,7 +18,7 @@ stages:
   jobs:
   - job: Build
     steps:
-    - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@2
+    - task: TerraformInstaller@2
       displayName: install terraform
       inputs:
         terraformVersion: '1.9.8'
