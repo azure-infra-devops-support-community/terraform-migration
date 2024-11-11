@@ -23,11 +23,23 @@ stages:
               inlineScript: |
                 az account show  
 
+          # Install aztfexport
+          - script: |
+              pip install git+https://github.com/Azure/aztfexport.git
+            displayName: 'Install aztfexport'
+
+          # Export specific VM to $(System.DefaultWorkingDirectory)
+          - script: |
+              aztfexport -s $(ARM_SUBSCRIPTION_ID) -g $(TFSTATE_RG) -r Microsoft.Compute/virtualMachines/$(VM_NAME) -o $(System.DefaultWorkingDirectory)
+            displayName: 'Export Specific VM to Terraform'
+
+          # Install Terraform
           - task: TerraformInstaller@2
             displayName: 'Install Terraform'
             inputs:
               terraformVersion: '1.9.8'
 
+          # Initialize Terraform in $(System.DefaultWorkingDirectory)
           - task: TerraformCLI@2
             displayName: 'Terraform Initialization'
             inputs:
@@ -42,6 +54,7 @@ stages:
               allowTelemetryCollection: true
               commandOptions: '-upgrade'
 
+          # Run terraform plan
           - task: TerraformCLI@2
             displayName: 'Terraform Plan'
             inputs:
@@ -57,12 +70,14 @@ stages:
                 -var "client_secret=$(ARM_CLIENT_SECRET)"
                 -var "tenant_id=$(ARM_TENANT_ID)"
 
+          # Publish the Terraform plan as an artifact
           - task: PublishPipelineArtifact@1
             displayName: 'Publish Terraform Plan as Artifact'
             inputs:
               targetPath: '$(System.DefaultWorkingDirectory)/output.tfplan'
-              artifact: 'tfplan'
+              artifactName: 'tfplan'
 
+          # Run terraform apply
           - task: TerraformCLI@2
             displayName: 'Terraform Apply'
             inputs:
@@ -71,5 +86,82 @@ stages:
               environmentServiceName: $(SVC_CONNECTION)
               commandOptions: '-input=false -auto-approve -refresh=false -lock=false output.tfplan'
               allowTelemetryCollection: true
+
+
+
+
+# name: Infrastructure-Deployment-$(Build.SourceBranchName)-$(Date:yyyyMMdd)
+
+# variables:
+#   - group: bootcamp-variables  
+
+# trigger:
+#   - main
+
+# pool:
+#   vmImage: 'ubuntu-latest' 
+
+# stages: 
+#   - stage: Terraform_Deployment
+#     jobs:
+#       - job: BuildAndDeploy
+#         steps:
+#           - task: AzureCLI@2
+#             displayName: 'Azure CLI Login'
+#             inputs:
+#               azureSubscription: $(SVC_CONNECTION)
+#               scriptType: 'bash'
+#               scriptLocation: 'inlineScript'
+#               inlineScript: |
+#                 az account show  
+
+#           - task: TerraformInstaller@2
+#             displayName: 'Install Terraform'
+#             inputs:
+#               terraformVersion: '1.9.8'
+
+#           - task: TerraformCLI@2
+#             displayName: 'Terraform Initialization'
+#             inputs:
+#               command: 'init'
+#               workingDirectory: '$(System.DefaultWorkingDirectory)'
+#               backendType: 'azurerm'
+#               backendServiceArm: $(SVC_CONNECTION)
+#               backendAzureRmResourceGroupName: '$(TFSTATE_RG)'
+#               backendAzureRmStorageAccountName: '$(TFSTATE_SA)'
+#               backendAzureRmContainerName: '$(TFSTATE_CONTAINER)'
+#               backendAzureRmKey: '$(TFSTATE_KEY)'
+#               allowTelemetryCollection: true
+#               commandOptions: '-upgrade'
+
+#           - task: TerraformCLI@2
+#             displayName: 'Terraform Plan'
+#             inputs:
+#               command: 'plan'
+#               workingDirectory: '$(System.DefaultWorkingDirectory)'
+#               environmentServiceName: $(SVC_CONNECTION)
+#               allowTelemetryCollection: true
+#               publishPlanResults: 'output'
+#               commandOptions: >
+#                 -lock=false -input=false -out=output.tfplan
+#                 -var "subscription_id=$(ARM_SUBSCRIPTION_ID)"
+#                 -var "client_id=$(ARM_CLIENT_ID)"
+#                 -var "client_secret=$(ARM_CLIENT_SECRET)"
+#                 -var "tenant_id=$(ARM_TENANT_ID)"
+
+#           - task: PublishPipelineArtifact@1
+#             displayName: 'Publish Terraform Plan as Artifact'
+#             inputs:
+#               targetPath: '$(System.DefaultWorkingDirectory)/output.tfplan'
+#               artifact: 'tfplan'
+
+#           - task: TerraformCLI@2
+#             displayName: 'Terraform Apply'
+#             inputs:
+#               command: 'apply'
+#               workingDirectory: '$(System.DefaultWorkingDirectory)'
+#               environmentServiceName: $(SVC_CONNECTION)
+#               commandOptions: '-input=false -auto-approve -refresh=false -lock=false output.tfplan'
+#               allowTelemetryCollection: true
 
 
