@@ -1,10 +1,10 @@
 name: Infrastructure-Deployment-$(Build.SourceBranchName)-$(Date:yyyyMMdd)
 
 variables:
-  TFSTATE_SA: iacbootslab
-  TFSTATE_CONTAINER: tfstate-demo
-  TFSTATE_KEY: aks.terraform.tfstate
-  TFSTATE_RG: demo
+  TFSTATE_SA: azbootcampsa
+  TFSTATE_CONTAINER: tfstate
+  TFSTATE_KEY: migrate.terraform.tfstate
+  TFSTATE_RG: Chidi
   SVC_CONNECTION: demo-service-con
 
 trigger:
@@ -28,7 +28,7 @@ stages:
       displayName: 'Initialization'
       inputs:
         command: 'init'
-        workingDirectory: '$(System.DefaultWorkingDirectory)/dev'
+        workingDirectory: '$(System.DefaultWorkingDirectory)'
         backendType: 'azurerm'
         backendServiceArm: $(SVC_CONNECTION)
         backendAzureRmResourceGroupName: '$(TFSTATE_RG)'
@@ -42,7 +42,7 @@ stages:
       displayName: 'Execute Plan'
       inputs:
         command: 'plan'
-        workingDirectory: '$(System.DefaultWorkingDirectory)/dev'
+        workingDirectory: '$(System.DefaultWorkingDirectory)'
         environmentServiceName: $(SVC_CONNECTION)
         allowTelemetryCollection: true
         publishPlanResults: 'output'
@@ -59,7 +59,6 @@ stages:
   jobs:
   - deployment: Deploy_Infrastructure
     displayName: 'Deploy Infrastructure to Environment'
-    environment: 'dev'
     strategy:
       runOnce:
         deploy:
@@ -70,14 +69,14 @@ stages:
           - script: |
               echo "Listing files after downloading artifact:"
               ls -l $(Pipeline.Workspace)/tfplan/
-              cp $(Pipeline.Workspace)/tfplan/output.tfplan $(System.DefaultWorkingDirectory)/dev/
+              cp $(Pipeline.Workspace)/tfplan/output.tfplan $(System.DefaultWorkingDirectory)/
             displayName: 'Validate and Move Tplan for Apply'
 
           - task: TerraformCLI@2
             displayName: 'Re-initialize'
             inputs:
               command: 'init'
-              workingDirectory: '$(System.DefaultWorkingDirectory)/dev'
+              workingDirectory: '$(System.DefaultWorkingDirectory)'
               backendServiceArm: '$(SVC_CONNECTION)'
               backendAzureRmResourceGroupName: '$(TFSTATE_RG)'
               backendAzureRmStorageAccountName: '$(TFSTATE_SA)'
@@ -89,7 +88,7 @@ stages:
             displayName: 'Deploy'
             inputs:
               command: 'apply'
-              workingDirectory: '$(System.DefaultWorkingDirectory)/dev'
+              workingDirectory: '$(System.DefaultWorkingDirectory)'
               environmentServiceName: $(SVC_CONNECTION)
               commandOptions: '-input=false -auto-approve output.tfplan'
               allowTelemetryCollection: true
