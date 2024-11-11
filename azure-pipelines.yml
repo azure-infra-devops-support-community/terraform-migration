@@ -60,7 +60,7 @@ stages:
     - task: PublishPipelineArtifact@1
       displayName: 'Publish Terraform Plan as Artifact'
       inputs:
-        targetPath: '$(System.DefaultWorkingDirectory)/dev/output.tfplan'
+        targetPath: '$(System.DefaultWorkingDirectory)/output.tfplan'
         artifact: 'tfplan'
 
 - stage: Terraform_Deploy
