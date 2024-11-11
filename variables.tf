@@ -22,3 +22,19 @@ variable "acr_name" {
   type        = string
   description = "ACR name"
 }
+variable "subscription_id" {
+  type        = string
+  description = "Azure sub"
+}
+variable "client_id" {
+  type        = string
+  description = "SP id"
+}
+variable "client_secret" {
+  type        = string
+  description = "SP secret"
+}
+variable "tenant_id" {
+  type        = string
+  description = "Azure tenant id"
+}
