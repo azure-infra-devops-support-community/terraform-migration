@@ -2,11 +2,6 @@ name: Infrastructure-Deployment-$(Build.SourceBranchName)-$(Date:yyyyMMdd)
 
 variables:
   - group: bootcamp-variables  
-  # TFSTATE_SA: azbootcampsa
-  # TFSTATE_CONTAINER: tfstate
-  # TFSTATE_KEY: migrate.terraform.tfstate
-  # TFSTATE_RG: Chidi
-  # SVC_CONNECTION: demo-service-conn
 
 trigger:
 - main
@@ -55,7 +50,12 @@ stages:
         environmentServiceName: $(SVC_CONNECTION)
         allowTelemetryCollection: true
         publishPlanResults: 'output'
-        commandOptions: '-lock=false -input=false -out=output.tfplan'
+        commandOptions: >
+          -lock=false -input=false -out=output.tfplan
+          -var "subscription_id=$(ARM_SUBSCRIPTION_ID)"
+          -var "client_id=$(ARM_CLIENT_ID)"
+          -var "client_secret=$(ARM_CLIENT_SECRET)"
+          -var "tenant_id=$(ARM_TENANT_ID)"
 
     - task: PublishPipelineArtifact@1
       displayName: 'Publish Terraform Plan as Artifact'
@@ -96,10 +96,119 @@ stages:
         command: 'apply'
         workingDirectory: '$(System.DefaultWorkingDirectory)'
         environmentServiceName: $(SVC_CONNECTION)
-        commandOptions: '-input=false -auto-approve output.tfplan'
+        commandOptions: >
+          -input=false -auto-approve output.tfplan
+          -var "subscription_id=$(ARM_SUBSCRIPTION_ID)"
+          -var "client_id=$(ARM_CLIENT_ID)"
+          -var "client_secret=$(ARM_CLIENT_SECRET)"
+          -var "tenant_id=$(ARM_TENANT_ID)"
         allowTelemetryCollection: true
-      env:
-        subscription_id: $(ARM_SUBSCRIPTION_ID)
-        client_id: $(ARM_CLIENT_ID)
-        client_secret: $(ARM_CLIENT_SECRET)
-        tenant_id: $(ARM_TENANT_ID)
+
+
+
+
+# name: Infrastructure-Deployment-$(Build.SourceBranchName)-$(Date:yyyyMMdd)
+
+# variables:
+#   - group: bootcamp-variables  
+#   # TFSTATE_SA: azbootcampsa
+#   # TFSTATE_CONTAINER: tfstate
+#   # TFSTATE_KEY: migrate.terraform.tfstate
+#   # TFSTATE_RG: Chidi
+#   # SVC_CONNECTION: demo-service-conn
+
+# trigger:
+# - main
+
+# pool:
+#   vmImage: 'ubuntu-latest' 
+
+# stages: 
+# - stage: Terraform_build
+#   jobs:
+#   - job: Build
+#     steps:
+#     - task: AzureCLI@2
+#       displayName: 'Azure CLI Login'
+#       inputs:
+#         azureSubscription: $(SVC_CONNECTION)
+#         scriptType: 'bash'
+#         scriptLocation: 'inlineScript'
+#         inlineScript: |
+#           az account show  # Optional step to confirm successful login
+
+#     - task: TerraformInstaller@2
+#       displayName: install terraform
+#       inputs:
+#         terraformVersion: '1.9.8'
+
+#     - task: TerraformCLI@2
+#       displayName: 'Initialization'
+#       inputs:
+#         command: 'init'
+#         workingDirectory: '$(System.DefaultWorkingDirectory)'
+#         backendType: 'azurerm'
+#         backendServiceArm: $(SVC_CONNECTION)
+#         backendAzureRmResourceGroupName: '$(TFSTATE_RG)'
+#         backendAzureRmStorageAccountName: '$(TFSTATE_SA)'
+#         backendAzureRmContainerName: '$(TFSTATE_CONTAINER)'
+#         backendAzureRmKey: '$(TFSTATE_KEY)'
+#         allowTelemetryCollection: true
+#         commandOptions: '-upgrade'
+
+#     - task: TerraformCLI@2
+#       displayName: 'Execute Plan'
+#       inputs:
+#         command: 'plan'
+#         workingDirectory: '$(System.DefaultWorkingDirectory)'
+#         environmentServiceName: $(SVC_CONNECTION)
+#         allowTelemetryCollection: true
+#         publishPlanResults: 'output'
+#         commandOptions: '-lock=false -input=false -out=output.tfplan'
+
+#     - task: PublishPipelineArtifact@1
+#       displayName: 'Publish Terraform Plan as Artifact'
+#       inputs:
+#         targetPath: '$(System.DefaultWorkingDirectory)/dev/output.tfplan'
+#         artifact: 'tfplan'
+
+# - stage: Terraform_Deploy
+#   dependsOn: Terraform_build
+#   jobs:
+#   - job: Deploy_Infrastructure
+#     displayName: 'Deploy Infrastructure'
+#     steps:
+#     - download: current
+#       artifact: tfplan
+
+#     - script: |
+#         echo "Listing files after downloading artifact:"
+#         ls -l $(Pipeline.Workspace)/tfplan/
+#         cp $(Pipeline.Workspace)/tfplan/output.tfplan $(System.DefaultWorkingDirectory)/
+#       displayName: 'Validate and Move Tplan for Apply'
+
+#     - task: TerraformCLI@2
+#       displayName: 'Re-initialize'
+#       inputs:
+#         command: 'init'
+#         workingDirectory: '$(System.DefaultWorkingDirectory)'
+#         backendServiceArm: $(SVC_CONNECTION)
+#         backendAzureRmResourceGroupName: $(TFSTATE_RG)
+#         backendAzureRmStorageAccountName: $(TFSTATE_SA)
+#         backendAzureRmContainerName: $(TFSTATE_CONTAINER)
+#         backendAzureRmKey: $(TFSTATE_KEY)
+#         commandOptions: '-upgrade'
+
+#     - task: TerraformCLI@2
+#       displayName: 'Deploy'
+#       inputs:
+#         command: 'apply'
+#         workingDirectory: '$(System.DefaultWorkingDirectory)'
+#         environmentServiceName: $(SVC_CONNECTION)
+#         commandOptions: '-input=false -auto-approve output.tfplan'
+#         allowTelemetryCollection: true
+#       env:
+#         subscription_id: $(ARM_SUBSCRIPTION_ID)
+#         client_id: $(ARM_CLIENT_ID)
+#         client_secret: $(ARM_CLIENT_SECRET)
+#         tenant_id: $(ARM_TENANT_ID)
