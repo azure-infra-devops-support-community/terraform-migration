@@ -18,6 +18,15 @@ stages:
   jobs:
   - job: Build
     steps:
+    - task: AzureCLI@2
+      displayName: 'Azure CLI Login'
+      inputs:
+        azureSubscription: $(SVC_CONNECTION)
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          az account show  # Optional step to confirm successful login
+
     - task: TerraformInstaller@2
       displayName: install terraform
       inputs:
