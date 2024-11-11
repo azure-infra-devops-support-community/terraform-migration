@@ -34,6 +34,8 @@ resource "azurerm_kubernetes_cluster" "aks" {
   }
 }
 
-
+output "aks_id" {
+  value = try(azurerm_kubernetes_cluster.aks.id, null)
+}
 
 
