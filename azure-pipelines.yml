@@ -23,15 +23,23 @@ stages:
               inlineScript: |
                 az account show  
 
-          # Install aztfexport
-          - script: |
-              pip install git+https://github.com/Azure/aztfexport.git
-            displayName: 'Install aztfexport'
+          # # Install aztfexport
+          # - script: |
+          #     pip install git+https://github.com/Azure/aztfexport.git
+          #   displayName: 'Install aztfexport'
 
-          # Export specific VM to $(System.DefaultWorkingDirectory)
+          # # Export specific VM to $(System.DefaultWorkingDirectory)
+          # - script: |
+          #     aztfexport -s $(ARM_SUBSCRIPTION_ID) -g $(TFSTATE_RG) -r Microsoft.Compute/virtualMachines/$(VM_NAME) -o $(System.DefaultWorkingDirectory)
+          #   displayName: 'Export Specific VM to Terraform'
           - script: |
-              aztfexport -s $(ARM_SUBSCRIPTION_ID) -g $(TFSTATE_RG) -r Microsoft.Compute/virtualMachines/$(VM_NAME) -o $(System.DefaultWorkingDirectory)
+              git clone https://github.com/Azure/aztfexport.git $(System.DefaultWorkingDirectory)/aztfexport
+            displayName: 'Clone aztfexport Repository'
+
+          - script: |
+              python3 $(System.DefaultWorkingDirectory)/aztfexport/aztfexport.py -s $(ARM_SUBSCRIPTION_ID) -g $(TFSTATE_RG) -r Microsoft.Compute/virtualMachines/$(VM_NAME) -o $(System.DefaultWorkingDirectory)
             displayName: 'Export Specific VM to Terraform'
+
 
           # Install Terraform
           - task: TerraformInstaller@2
