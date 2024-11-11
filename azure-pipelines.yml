@@ -1,11 +1,12 @@
 name: Infrastructure-Deployment-$(Build.SourceBranchName)-$(Date:yyyyMMdd)
 
 variables:
-  TFSTATE_SA: azbootcampsa
-  TFSTATE_CONTAINER: tfstate
-  TFSTATE_KEY: migrate.terraform.tfstate
-  TFSTATE_RG: Chidi
-  SVC_CONNECTION: demo-service-conn
+  - group: bootcamp-variables  
+  # TFSTATE_SA: azbootcampsa
+  # TFSTATE_CONTAINER: tfstate
+  # TFSTATE_KEY: migrate.terraform.tfstate
+  # TFSTATE_RG: Chidi
+  # SVC_CONNECTION: demo-service-conn
 
 trigger:
 - main
@@ -82,11 +83,11 @@ stages:
       inputs:
         command: 'init'
         workingDirectory: '$(System.DefaultWorkingDirectory)'
-        backendServiceArm: '$(SVC_CONNECTION)'
-        backendAzureRmResourceGroupName: '$(TFSTATE_RG)'
-        backendAzureRmStorageAccountName: '$(TFSTATE_SA)'
-        backendAzureRmContainerName: '$(TFSTATE_CONTAINER)'
-        backendAzureRmKey: '$(TFSTATE_KEY)'
+        backendServiceArm: $(SVC_CONNECTION)
+        backendAzureRmResourceGroupName: $(TFSTATE_RG)
+        backendAzureRmStorageAccountName: $(TFSTATE_SA)
+        backendAzureRmContainerName: $(TFSTATE_CONTAINER)
+        backendAzureRmKey: $(TFSTATE_KEY)
         commandOptions: '-upgrade'
 
     - task: TerraformCLI@2
@@ -97,3 +98,8 @@ stages:
         environmentServiceName: $(SVC_CONNECTION)
         commandOptions: '-input=false -auto-approve output.tfplan'
         allowTelemetryCollection: true
+      env:
+        ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
+        ARM_CLIENT_ID: $(ARM_CLIENT_ID)
+        ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
+        ARM_TENANT_ID: $(ARM_TENANT_ID)
