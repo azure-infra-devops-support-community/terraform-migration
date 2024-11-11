@@ -63,6 +63,22 @@ stages:
         targetPath: '$(System.DefaultWorkingDirectory)/output.tfplan'
         artifact: 'tfplan'
 
+    - task: TerraformCLI@2
+      displayName: 'Deploy'
+      inputs:
+        command: 'apply'
+        workingDirectory: '$(System.DefaultWorkingDirectory)'
+        environmentServiceName: $(SVC_CONNECTION)
+        commandOptions: >
+          -input=false -auto-approve output.tfplan
+          -var "subscription_id=$(ARM_SUBSCRIPTION_ID)"
+          -var "client_id=$(ARM_CLIENT_ID)"
+          -var "client_secret=$(ARM_CLIENT_SECRET)"
+          -var "tenant_id=$(ARM_TENANT_ID)"
+        allowTelemetryCollection: true        
+
+        
+
 - stage: Terraform_Deploy
   dependsOn: Terraform_build
   jobs:
