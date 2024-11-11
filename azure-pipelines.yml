@@ -101,7 +101,8 @@ stages:
       inputs:
         command: 'init'
         workingDirectory: '$(System.DefaultWorkingDirectory)'
-        backendServiceArm: $(SVC_CONNECTION)
+        # backendServiceArm: $(SVC_CONNECTION)
+        environmentServiceName: $(SVC_CONNECTION)
         backendAzureRmResourceGroupName: $(TFSTATE_RG)
         backendAzureRmStorageAccountName: $(TFSTATE_SA)
         backendAzureRmContainerName: $(TFSTATE_CONTAINER)
