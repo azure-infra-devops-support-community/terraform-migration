@@ -67,7 +67,7 @@ stages:
               command: 'apply'
               workingDirectory: '$(System.DefaultWorkingDirectory)'
               environmentServiceName: $(SVC_CONNECTION)
-              commandOptions: '-input=false -auto-approve -lock=false output.tfplan'
+              commandOptions: '-input=false -auto-approve -refresh=false -lock=false output.tfplan'
               allowTelemetryCollection: true
 
 
