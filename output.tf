@@ -1,7 +1,3 @@
-output "aks_id" {
-  value = try(azurerm_kubernetes_cluster.aks.id, "AKS cluster not created")
-}
-
 output "aks_fqdn" {
   value = azurerm_kubernetes_cluster.aks.fqdn
 }
