@@ -8,9 +8,9 @@ pool:
   vmImage: 'ubuntu-latest' 
 
 stages: 
-  - stage: Terraform_build
+  - stage: Terraform_Deployment
     jobs:
-      - job: Build
+      - job: Deploy
         steps:
           - task: AzureCLI@2
             displayName: 'Azure CLI Login'
@@ -22,12 +22,12 @@ stages:
                 az account show  # Optional step to confirm successful login
 
           - task: TerraformInstaller@2
-            displayName: install terraform
+            displayName: 'Install Terraform'
             inputs:
               terraformVersion: '1.9.8'
 
           - task: TerraformCLI@2
-            displayName: 'Initialization'
+            displayName: 'Terraform Initialization'
             inputs:
               command: 'init'
               workingDirectory: '$(System.DefaultWorkingDirectory)'
@@ -41,7 +41,7 @@ stages:
               commandOptions: '-upgrade'
 
           - task: TerraformCLI@2
-            displayName: 'Execute Plan'
+            displayName: 'Terraform Plan'
             inputs:
               command: 'plan'
               workingDirectory: '$(System.DefaultWorkingDirectory)'
@@ -62,13 +62,12 @@ stages:
               artifact: 'tfplan'
 
           - task: TerraformCLI@2
-            displayName: 'Deploy'
+            displayName: 'Terraform Apply'
             inputs:
               command: 'apply'
               workingDirectory: '$(System.DefaultWorkingDirectory)'
               environmentServiceName: $(SVC_CONNECTION)
-              commandOptions: '-input=false -auto-approve'
-              commandOptions: 'output.tfplan'
+              commandOptions: '-input=false -auto-approve output.tfplan'
               allowTelemetryCollection: true
 
 
