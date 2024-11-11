@@ -5,12 +5,14 @@ variables:
   TFSTATE_CONTAINER: tfstate-demo
   TFSTATE_KEY: aks.terraform.tfstate
   TFSTATE_RG: demo
-  SVC_CONNECTION: eng-lab-automation
+  SVC_CONNECTION: demo-service-con
 
 trigger:
 - main
 
-pool: linux-agent-pool
+pool:
+  vmImage: 'ubuntu-latest' 
+
 
 stages: 
 - stage: Terraform_build
