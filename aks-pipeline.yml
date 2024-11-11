@@ -1,0 +1,57 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  name: 'linux-agentpool'  
+
+variables:
+  terraformVersion: '1.5.5'  
+  serviceConnection: 'automation-connection20'  
+
+steps:
+  - task: TerraformInstaller@0
+    inputs:
+      terraformVersion: $(terraformVersion)
+
+
+# Authenticate to Azure
+  - task: AzureCLI@2
+    inputs:
+      azureSubscription: $(serviceConnection)
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        echo "Logging into Azure..."
+        az account show
+
+  - checkout: self
+
+  # Initialize Terraform
+  - task: TerraformTaskV4@4
+    displayName: 'Terraform Init'
+    inputs:
+      command: 'init'
+      workingDirectory: $(System.DefaultWorkingDirectory)
+      backendServiceArm: $(serviceConnection)
+
+  # Terraform Plan
+  - task: TerraformTaskV4@4
+    displayName: 'Terraform Plan'
+    inputs:
+      command: 'plan'
+      workingDirectory: $(System.DefaultWorkingDirectory)
+      backendServiceArm: $(serviceConnection)
+      allowTelemetryCollection: true
+      environmentServiceNameAzureRM: $(serviceConnection)
+
+  # Terraform Apply (with manual approval)
+  - task: TerraformTaskV4@4
+    displayName: 'Terraform Apply'
+    inputs:
+      command: 'apply'
+      workingDirectory: $(System.DefaultWorkingDirectory)
+      backendServiceArm: $(serviceConnection)
+      environmentServiceNameAzureRM: $(serviceConnection)
+      additionalArgs: '-auto-approve'
