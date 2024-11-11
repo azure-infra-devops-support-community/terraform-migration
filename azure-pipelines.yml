@@ -5,7 +5,7 @@ variables:
   TFSTATE_CONTAINER: tfstate
   TFSTATE_KEY: migrate.terraform.tfstate
   TFSTATE_RG: Chidi
-  SVC_CONNECTION: demo-service-con
+  SVC_CONNECTION: demo-service-conn
 
 trigger:
 - main
