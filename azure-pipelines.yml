@@ -10,7 +10,7 @@ pool:
 stages: 
   - stage: Terraform_Deployment
     jobs:
-      - job: Deploy
+      - job: BuildAndDeploy
         steps:
           - task: AzureCLI@2
             displayName: 'Azure CLI Login'
@@ -67,7 +67,7 @@ stages:
               command: 'apply'
               workingDirectory: '$(System.DefaultWorkingDirectory)'
               environmentServiceName: $(SVC_CONNECTION)
-              commandOptions: '-input=false -auto-approve output.tfplan'
+              commandOptions: '-input=false -auto-approve -lock=false output.tfplan'
               allowTelemetryCollection: true
 
 
