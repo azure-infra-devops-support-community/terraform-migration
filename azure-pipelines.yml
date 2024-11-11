@@ -69,72 +69,72 @@ stages:
         command: 'apply'
         workingDirectory: '$(System.DefaultWorkingDirectory)'
         environmentServiceName: $(SVC_CONNECTION)
-        commandOptions: >
-          -input=false -auto-approve output.tfplan
-          -var "subscription_id=$(ARM_SUBSCRIPTION_ID)"
-          -var "client_id=$(ARM_CLIENT_ID)"
-          -var "client_secret=$(ARM_CLIENT_SECRET)"
-          -var "tenant_id=$(ARM_TENANT_ID)"
+        # commandOptions: >
+        #   -input=false -auto-approve output.tfplan
+        #   -var "subscription_id=$(ARM_SUBSCRIPTION_ID)"
+        #   -var "client_id=$(ARM_CLIENT_ID)"
+        #   -var "client_secret=$(ARM_CLIENT_SECRET)"
+        #   -var "tenant_id=$(ARM_TENANT_ID)"
         allowTelemetryCollection: true        
 
-        
 
-- stage: Terraform_Deploy
-  dependsOn: Terraform_build
-  jobs:
-  - job: Deploy_Infrastructure
-    displayName: 'Deploy Infrastructure'
-    steps:
-    - task: AzureCLI@2
-      displayName: 'Azure CLI Login'
-      inputs:
-        azureSubscription: $(SVC_CONNECTION)
-        scriptType: 'bash'
-        scriptLocation: 'inlineScript'
-        inlineScript: |
-          az account show  # Optional step to confirm successful login
 
-    - download: current
-      artifact: tfplan
+# - stage: Terraform_Deploy
+#   dependsOn: Terraform_build
+#   jobs:
+#   - job: Deploy_Infrastructure
+#     displayName: 'Deploy Infrastructure'
+#     steps:
+#     - task: AzureCLI@2
+#       displayName: 'Azure CLI Login'
+#       inputs:
+#         azureSubscription: $(SVC_CONNECTION)
+#         scriptType: 'bash'
+#         scriptLocation: 'inlineScript'
+#         inlineScript: |
+#           az account show  # Optional step to confirm successful login
 
-    - script: |
-        echo "Listing files after downloading artifact:"
-        ls -l $(Pipeline.Workspace)/tfplan/
-        cp $(Pipeline.Workspace)/tfplan/output.tfplan $(System.DefaultWorkingDirectory)/
-      displayName: 'Validate and Move Tplan for Apply'
+#     - download: current
+#       artifact: tfplan
 
-    - task: TerraformCLI@2
-      displayName: 'Re-initialize'
-      inputs:
-        command: 'init'
-        workingDirectory: '$(System.DefaultWorkingDirectory)'
-        # backendServiceArm: $(SVC_CONNECTION)
-        environmentServiceName: $(SVC_CONNECTION)
-        backendAzureRmResourceGroupName: $(TFSTATE_RG)
-        backendAzureRmStorageAccountName: $(TFSTATE_SA)
-        backendAzureRmContainerName: $(TFSTATE_CONTAINER)
-        backendAzureRmKey: $(TFSTATE_KEY)
-        commandOptions: >
-          -upgrade
-          -var "subscription_id=$(ARM_SUBSCRIPTION_ID)"
-          -var "client_id=$(ARM_CLIENT_ID)"
-          -var "client_secret=$(ARM_CLIENT_SECRET)"
-          -var "tenant_id=$(ARM_TENANT_ID)"
-        allowTelemetryCollection: true  
+#     - script: |
+#         echo "Listing files after downloading artifact:"
+#         ls -l $(Pipeline.Workspace)/tfplan/
+#         cp $(Pipeline.Workspace)/tfplan/output.tfplan $(System.DefaultWorkingDirectory)/
+#       displayName: 'Validate and Move Tplan for Apply'
 
-    - task: TerraformCLI@2
-      displayName: 'Deploy'
-      inputs:
-        command: 'apply'
-        workingDirectory: '$(System.DefaultWorkingDirectory)'
-        environmentServiceName: $(SVC_CONNECTION)
-        commandOptions: >
-          -input=false -auto-approve output.tfplan
-          -var "subscription_id=$(ARM_SUBSCRIPTION_ID)"
-          -var "client_id=$(ARM_CLIENT_ID)"
-          -var "client_secret=$(ARM_CLIENT_SECRET)"
-          -var "tenant_id=$(ARM_TENANT_ID)"
-        allowTelemetryCollection: true
+#     - task: TerraformCLI@2
+#       displayName: 'Re-initialize'
+#       inputs:
+#         command: 'init'
+#         workingDirectory: '$(System.DefaultWorkingDirectory)'
+#         # backendServiceArm: $(SVC_CONNECTION)
+#         environmentServiceName: $(SVC_CONNECTION)
+#         backendAzureRmResourceGroupName: $(TFSTATE_RG)
+#         backendAzureRmStorageAccountName: $(TFSTATE_SA)
+#         backendAzureRmContainerName: $(TFSTATE_CONTAINER)
+#         backendAzureRmKey: $(TFSTATE_KEY)
+#         commandOptions: >
+#           -upgrade
+#           -var "subscription_id=$(ARM_SUBSCRIPTION_ID)"
+#           -var "client_id=$(ARM_CLIENT_ID)"
+#           -var "client_secret=$(ARM_CLIENT_SECRET)"
+#           -var "tenant_id=$(ARM_TENANT_ID)"
+#         allowTelemetryCollection: true  
+
+#     - task: TerraformCLI@2
+#       displayName: 'Deploy'
+#       inputs:
+#         command: 'apply'
+#         workingDirectory: '$(System.DefaultWorkingDirectory)'
+#         environmentServiceName: $(SVC_CONNECTION)
+#         commandOptions: >
+#           -input=false -auto-approve output.tfplan
+#           -var "subscription_id=$(ARM_SUBSCRIPTION_ID)"
+#           -var "client_id=$(ARM_CLIENT_ID)"
+#           -var "client_secret=$(ARM_CLIENT_SECRET)"
+#           -var "tenant_id=$(ARM_TENANT_ID)"
+#         allowTelemetryCollection: true
 
 
 
