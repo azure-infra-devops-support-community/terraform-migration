@@ -69,6 +69,15 @@ stages:
   - job: Deploy_Infrastructure
     displayName: 'Deploy Infrastructure'
     steps:
+    - task: AzureCLI@2
+      displayName: 'Azure CLI Login'
+      inputs:
+        azureSubscription: $(SVC_CONNECTION)
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          az account show  # Optional step to confirm successful login
+
     - download: current
       artifact: tfplan
 
@@ -108,6 +117,7 @@ stages:
           -var "client_secret=$(ARM_CLIENT_SECRET)"
           -var "tenant_id=$(ARM_TENANT_ID)"
         allowTelemetryCollection: true
+
 
 
 
