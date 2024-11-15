@@ -8,9 +8,9 @@ pool:
   vmImage: 'ubuntu-latest'
 
 stages: 
-  - stage: Terraform_Deployment
+  - stage: Terraform_build
     jobs:
-      - job: BuildAndDeploy
+      - job: Build
         steps:
           - task: AzureCLI@2
             displayName: 'Azure CLI Login'
