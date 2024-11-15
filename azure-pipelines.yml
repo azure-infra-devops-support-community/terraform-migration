@@ -61,42 +61,42 @@ stages:
               targetPath: '$(System.DefaultWorkingDirectory)/output.tfplan'
               artifact: 'tfplan'
 
-  - stage: Terraform_Deploy
-    dependsOn: Terraform_build
-    jobs:
-    - deployment: Deploy_Infrastructure
-      displayName: 'Deploy Infrastructure to Environment'
-      environment: 'dev'
-      strategy:
-        runOnce:
-          deploy:
-            steps:
-            - download: current
-              artifact: tfplan
+  # - stage: Terraform_Deploy
+  #   dependsOn: Terraform_build
+  #   jobs:
+  #   - deployment: Deploy_Infrastructure
+  #     displayName: 'Deploy Infrastructure to Environment'
+  #     environment: 'dev'
+  #     strategy:
+  #       runOnce:
+  #         deploy:
+  #           steps:
+  #           - download: current
+  #             artifact: tfplan
 
-            - script: |
-                echo "Listing files after downloading artifact:"
-                ls -l $(Pipeline.Workspace)/tfplan/
-                cp $(Pipeline.Workspace)/tfplan/output.tfplan $(System.DefaultWorkingDirectory)/dev/
-              displayName: 'Validate and Move Tplan for Apply'
+  #           - script: |
+  #               echo "Listing files after downloading artifact:"
+  #               ls -l $(Pipeline.Workspace)/tfplan/
+  #               cp $(Pipeline.Workspace)/tfplan/output.tfplan $(System.DefaultWorkingDirectory)/dev/
+  #             displayName: 'Validate and Move Tplan for Apply'
 
-            - task: TerraformCLI@2
-              displayName: 'Re-initialize'
-              inputs:
-                command: 'init'
-                workingDirectory: '$(System.DefaultWorkingDirectory)/dev'
-                backendServiceArm: '$(SVC_CONNECTION)'
-                backendAzureRmResourceGroupName: '$(TFSTATE_RG)'
-                backendAzureRmStorageAccountName: '$(TFSTATE_SA)'
-                backendAzureRmContainerName: '$(TFSTATE_CONTAINER)'
-                backendAzureRmKey: '$(TFSTATE_KEY)'
-                commandOptions: '-upgrade'
+  #           - task: TerraformCLI@2
+  #             displayName: 'Re-initialize'
+  #             inputs:
+  #               command: 'init'
+  #               workingDirectory: '$(System.DefaultWorkingDirectory)/dev'
+  #               backendServiceArm: '$(SVC_CONNECTION)'
+  #               backendAzureRmResourceGroupName: '$(TFSTATE_RG)'
+  #               backendAzureRmStorageAccountName: '$(TFSTATE_SA)'
+  #               backendAzureRmContainerName: '$(TFSTATE_CONTAINER)'
+  #               backendAzureRmKey: '$(TFSTATE_KEY)'
+  #               commandOptions: '-upgrade'
 
-            - task: TerraformCLI@2
-              displayName: 'Deploy'
-              inputs:
-                command: 'apply'
-                workingDirectory: '$(System.DefaultWorkingDirectory)/dev'
-                environmentServiceName: $(SVC_CONNECTION)
-                commandOptions: '-input=false -auto-approve output.tfplan'
-                allowTelemetryCollection: true
+  #           - task: TerraformCLI@2
+  #             displayName: 'Deploy'
+  #             inputs:
+  #               command: 'apply'
+  #               workingDirectory: '$(System.DefaultWorkingDirectory)/dev'
+  #               environmentServiceName: $(SVC_CONNECTION)
+  #               commandOptions: '-input=false -auto-approve output.tfplan'
+  #               allowTelemetryCollection: true
