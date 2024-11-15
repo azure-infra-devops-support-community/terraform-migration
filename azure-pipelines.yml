@@ -48,6 +48,7 @@ stages:
               environmentServiceName: $(SVC_CONNECTION)
               allowTelemetryCollection: true
               publishPlanResults: 'output'
+              commandOptions: '-lock=false -input=false -out=output.tfplan'
 
           - task: PublishPipelineArtifact@1
             displayName: 'Publish Terraform Plan as Artifact'
