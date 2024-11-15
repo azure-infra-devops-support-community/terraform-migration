@@ -49,7 +49,6 @@ stages:
               allowTelemetryCollection: true
               publishPlanResults: 'output'
               commandOptions: |
-                -chdir=$(System.DefaultWorkingDirectory)
                 -lock=false
                 -input=false
                 -out=output.tfplan
@@ -86,7 +85,7 @@ stages:
               workingDirectory: '$(System.DefaultWorkingDirectory)'
               backendServiceArm: $(SVC_CONNECTION)
               backendAzureRmResourceGroupName: $(TFSTATE_RG)
-              backendAzureRmStorageAccountName: '$(TFSTATE_SA)'
+              backendAzureRmStorageAccountName: $(TFSTATE_SA)'
               backendAzureRmContainerName: '$(TFSTATE_CONTAINER)'
               backendAzureRmKey: '$(TFSTATE_KEY)'
               commandOptions: '-upgrade'
