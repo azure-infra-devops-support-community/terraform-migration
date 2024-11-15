@@ -10,7 +10,7 @@ pool:
 stages: 
   - stage: Terraform_Deployment
     jobs:
-      - job: Build
+      - job: BuildAndDeploy
         steps:
           - task: AzureCLI@2
             displayName: 'Azure CLI Login'
@@ -49,7 +49,10 @@ stages:
               allowTelemetryCollection: true
               publishPlanResults: 'output'
               commandOptions: |
-                -lock=false -input=false -out=output.tfplan
+                -chdir=$(System.DefaultWorkingDirectory)
+                -lock=false
+                -input=false
+                -out=output.tfplan
                 -var "subscription_id=$(ARM_SUBSCRIPTION_ID)"
                 -var "client_id=$(ARM_CLIENT_ID)"
                 -var "client_secret=$(ARM_CLIENT_SECRET)"
@@ -83,9 +86,9 @@ stages:
               workingDirectory: '$(System.DefaultWorkingDirectory)'
               backendServiceArm: $(SVC_CONNECTION)
               backendAzureRmResourceGroupName: $(TFSTATE_RG)
-              backendAzureRmStorageAccountName: $(TFSTATE_SA)
-              backendAzureRmContainerName: $(TFSTATE_CONTAINER)
-              backendAzureRmKey: $(TFSTATE_KEY)
+              backendAzureRmStorageAccountName: '$(TFSTATE_SA)'
+              backendAzureRmContainerName: '$(TFSTATE_CONTAINER)'
+              backendAzureRmKey: '$(TFSTATE_KEY)'
               commandOptions: '-upgrade'
 
           - task: TerraformCLI@2
