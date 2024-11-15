@@ -10,7 +10,7 @@ pool:
 stages: 
   - stage: Terraform_Deployment
     jobs:
-      - job: BuildAndDeploy
+      - job: Build
         steps:
           - task: AzureCLI@2
             displayName: 'Azure CLI Login'
